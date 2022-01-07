@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-// Пример команды : reader 123123 -p C:\Users\hmzxp\Desktop\GitHub\node.js\lesson4 -t console.log
+// Пример команды : reader 123123 -p C:\Users\hmzxp\Desktop\GitHub\node.js\lesson4 1231234231 -t console.log
 
 
 
