@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="https://cdn.socket.io/4.4.1/socket.io.min.js"
+        integrity="sha384-fKnu0iswBIqkjxrhQCTZ7qlLHOFEgNkRmK2vaO/LbTZSXdJfAu6ewRBdwHPhBo/H"
+        crossorigin="anonymous"></script>
+    <style>
+        body {
+            width: 100%;
+            height: 99vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .chat {
+            height: 500px;
+            width: 1000px;
+            border: 1px solid #000;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .chatMessHist {
+            width: 100%;
+            height: 90%;
+            overflow: overlay;
+        }
+
+        .chatSendMess {
+
+            width: 100%;
+            height: 10%;
+            border-top: 1px solid #000;
+        }
+
+        form {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .chatSendMess form input {
+            width: 100%;
+            outline: none;
+            border: none;
+        }
+
+        .chatSendMess form button {
+            width: 60px;
+            outline: none;
+            border: none;
+            background-color: rgb(127, 161, 255);
+        }
+
+        .chatMessHist {
+            width: 98%;
+            padding: 10px;
+        }
+
+        .message {
+            margin-bottom: 5px;
+            width: 100%;
+        }
+
+        .message .author {
+            color: #2a5885;
+            font-size: 12, 5px;
+            font-weight: 700
+        }
+
+        .message .text {
+            margin-top: 3px;
+            font-size: 13px;
+            word-wrap: break-word;
+        }
+
+        .announcement {
+            color: grey;
+            margin-top: 5px;
+            margin-bottom: 5px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="chat">
+        <div class="chatMessHist"></div>
+        <div class="chatSendMess">
+            <form action="#">
+                <input type="text">
+                <button>Send</button>
+            </form>
+        </div>
+    </div>
+</body>
+<script>
+    const form = document.querySelector('form');
+    const input = document.querySelector('input');
+    const button = document.querySelector('button');
+    const chatMessHist = document.querySelector('.chatMessHist');
+    const socket = io('localhost:5555');
+    const nickname = prompt('Введите имя');
+
+    form.addEventListener('submit', (event) => {
+        event.preventDefault();
+        const msg = {
+            author: nickname,
+            text: input.value,
+        }
+        // событие отправки сообщения на сервер
+        socket.emit('clientMsg', msg)
+        input.value = '';
+    })
+    // событие аунтификации пользователя
+    socket.on('connect', () => {
+        socket.emit('userName', nickname);
+    })
+    // событие получение ответа от сервера
+    socket.on('serverAnswer', (data) => {
+        chatMessHist.insertAdjacentHTML('beforeend', `
+        <div class="message">
+                <div class="author">${data.author}</div>
+                <div class="text">
+                    ${data.text}
+                </div>
+            </div>
+        `)
+        chatMessHist.scrollTop = chatMessHist.scrollHeight;
+        input.focus();
+    })
+    // событие получения с сервера истории сообщений
+    socket.on('chatHistLoading', (data) => {
+        let chatHist = '';
+        data.forEach(item => {
+            chatHist += `
+            <div class="message">
+                <div class="author">${item.author}</div>
+                <div class="text">
+                    ${item.text}
+                </div>
+            </div>
+            `
+        })
+        chatMessHist.insertAdjacentHTML('beforeend', chatHist);
+        chatMessHist.scrollTop = chatMessHist.scrollHeight;
+        input.focus();
+    })
+    // событие обьявления подключения нового пользователя
+    socket.on('newUser', (data) => {
+        chatMessHist.insertAdjacentHTML('beforeend', `<div class="announcement">Подключился новый пользователь: ${data}</div>`);
+        chatMessHist.scrollTop = chatMessHist.scrollHeight;
+        input.focus();
+    })
+    // событие отключения старого пользователя
+    socket.on('userDisc', (data) => {
+        chatMessHist.insertAdjacentHTML('beforeend', `<div class="announcement"> Пользователь ${data} отключился</div>`);
+        chatMessHist.scrollTop = chatMessHist.scrollHeight;
+        input.focus();
+    })
+
+
+</script>
+
+</html>
