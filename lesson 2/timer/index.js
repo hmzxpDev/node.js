@@ -26,6 +26,7 @@ event.on('timerStop', (text) => {
     console.log(colors.red(text));
 });
 
+
 function calculationDiff([year, month, day, hour, minute, second] = date) {
     // начальная, финальая дата
     const start = DateTime.now();
@@ -43,6 +44,8 @@ function calculationDiff([year, month, day, hour, minute, second] = date) {
     }
 };
 
+// запускаем таймер
 const timer = setInterval(() => {
     calculationDiff([+years, +months, +days, +hours, +minutes, +seconds]);
 }, 1000);
+

@@ -14,7 +14,7 @@ const productionPrimeNumber = () => {
 
     // добавление в массив всех простых чисел до конца диапазона
     nextPrime:
-    for (let i = 1; i < endRange + 1; i++) {
+    for (let i = 2; i < endRange + 1; i++) {
         for (let j = 2; j < i; j++) {
             if (i % j == 0) continue nextPrime
         }
